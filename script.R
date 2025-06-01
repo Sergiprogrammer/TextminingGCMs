@@ -24,18 +24,18 @@ if ("knitr" %in% loadedNamespaces()) {
 }
 
 # Define plotting theme
-theme_AP <- function() {
-  theme_bw() +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.background = element_rect(fill = "transparent", color = NA),
-      legend.margin = margin(0, 0, 0, 0),
-      legend.box.margin = margin(-7, -7, -7, -7),
-      legend.key = element_rect(fill = "transparent", color = NA),
-      strip.background = element_rect(fill = "white")
-    )
-}
+#theme_AP <- function() {
+# theme_bw() +
+#    theme(
+#      panel.grid.major = element_blank(),
+#      panel.grid.minor = element_blank(),
+#      legend.background = element_rect(fill = "transparent", color = NA),
+#      legend.margin = margin(0, 0, 0, 0),
+#      legend.box.margin = margin(-7, -7, -7, -7),
+#      legend.key = element_rect(fill = "transparent", color = NA),
+#      strip.background = element_rect(fill = "white")
+#   )
+#}
 
 
 # Load Scopus metadata
@@ -54,10 +54,6 @@ for (model in gcms) {
   colname <- gsub("-", "_", model)
   full.dt[, (colname) := fifelse(grepl(tolower(model), full_text), 1, 0)]
 }
-
-# Extract institution
-#full.dt[, institution := gsub(".*?;\\s*", "", correspondence_address)]
-#full.dt[, institution := trimws(institution)]
 
 # Melt to long format
 melted <- melt(full.dt, id.vars = "institution", 
@@ -198,4 +194,6 @@ print(head(goal_gcm_ranking, 15))
 
 # Save to CSV
 fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
+
+
 
