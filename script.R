@@ -1,10 +1,12 @@
+# Set working directory
 setwd("C:/Users/sergi/OneDrive/Bureaublad/TextminingGCMs")
 
 # Define required packages
 required_packages <- c(
   "data.table", "tidyverse", "janitor", "stringr", 
   "ggplot2", "reshape2", "cowplot", "patchwork", 
-  "ggpubr", "lubridate", "knitr"
+  "ggpubr", "lubridate", "knitr", "sf", 
+  "rnaturalearth", "readr", "ggforce", "dplyr"
 )
 
 # Install missing packages only
@@ -16,26 +18,28 @@ if (length(missing_packages) > 0) {
 # Load all required packages
 invisible(lapply(required_packages, library, character.only = TRUE))
 
-# Set knitr options if knitr is loaded (for RMarkdown)
+# Set knitr options if knitr is loaded (for RMarkdown use)
 if ("knitr" %in% loadedNamespaces()) {
   knitr::opts_chunk$set(echo = TRUE, dev = "tikz", cache = TRUE)
 }
 
-
 # Define plotting theme
 theme_AP <- function() {
   theme_bw() +
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.background = element_rect(fill = "transparent", color = NA),
-          legend.margin = margin(0, 0, 0, 0),
-          legend.box.margin = margin(-7, -7, -7, -7),
-          legend.key = element_rect(fill = "transparent", color = NA),
-          strip.background = element_rect(fill = "white"))
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      legend.background = element_rect(fill = "transparent", color = NA),
+      legend.margin = margin(0, 0, 0, 0),
+      legend.box.margin = margin(-7, -7, -7, -7),
+      legend.key = element_rect(fill = "transparent", color = NA),
+      strip.background = element_rect(fill = "white")
+    )
 }
 
+
 # Load Scopus metadata
-full.dt <- fread("C:/Users/sergi/OneDrive/Bureaublad/TextminingGCMs/scopus_5.csv", encoding = "UTF-8", quote = '"', na.strings = "", data.table = TRUE)
+full.dt <- fread("C:/Users/sergi/OneDrive/Bureaublad/TextminingGCMs/scopus_5_with_institution_and_country.csv", encoding = "UTF-8", quote = '"', na.strings = "", data.table = TRUE)
 full.dt <- clean_names(full.dt)
 
 # Define GCM model list
@@ -52,8 +56,8 @@ for (model in gcms) {
 }
 
 # Extract institution
-full.dt[, institution := gsub(".*?;\\s*", "", correspondence_address)]
-full.dt[, institution := trimws(institution)]
+#full.dt[, institution := gsub(".*?;\\s*", "", correspondence_address)]
+#full.dt[, institution := trimws(institution)]
 
 # Melt to long format
 melted <- melt(full.dt, id.vars = "institution", 
@@ -82,4 +86,116 @@ print(head(model_popularity, 10))
 
 # Save to CSV
 fwrite(model_popularity, "GCM_model_popularity.csv")
+
+
+
+# --------------------------------------------------------
+# Create a GCM mention frequency ranking per institution
+# --------------------------------------------------------
+
+institution_gcm_ranking <- melted %>%
+  group_by(institution, GCM) %>%
+  summarise(frequency = sum(Mention, na.rm = TRUE)) %>%
+  filter(frequency > 0) %>%  # only include mentioned models
+  arrange(institution, desc(frequency)) %>%
+  ungroup()
+
+# View top few rows
+print(head(institution_gcm_ranking, 10))
+
+# Save to CSV
+fwrite(institution_gcm_ranking, "GCM_mentions_ranking_by_institution.csv")
+
+
+
+
+# --------------------------------------------------------
+# Create a GCM mention frequency ranking per country
+# --------------------------------------------------------
+
+# Melt again using 'country' as ID if not already done
+melted_country <- melt(full.dt, 
+                       id.vars = "country", 
+                       measure.vars = gsub("-", "_", gcms),
+                       variable.name = "GCM", 
+                       value.name = "Mention")
+
+# Summarise by country and GCM
+country_gcm_ranking <- melted_country %>%
+  group_by(country, GCM) %>%
+  summarise(frequency = sum(Mention, na.rm = TRUE)) %>%
+  filter(frequency > 0) %>%
+  arrange(country, desc(frequency)) %>%
+  ungroup()
+
+# View top results
+print(head(country_gcm_ranking, 10))
+
+# Save to CSV
+fwrite(country_gcm_ranking, "GCM_mentions_ranking_by_country.csv")
+
+
+
+
+
+
+
+# --------------------------------------------------------
+# GCM Mention Frequency Ranking by Research Goal
+# --------------------------------------------------------
+
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+# Assume 'full.dt' is a data.table with a 'full_text' column and GCM binary columns
+# Also assume 'gcms' is a character vector of GCM column names
+
+# Define research goals with regex patterns including variants and synonyms
+goal_keywords <- list(
+  "carbon cycle" = "(?i)carbon cycle|carbon-climate feedback|carbon budget",
+  "ITCZ" = "(?i)ITCZ|Intertropical Convergence Zone",
+  "sea level rise" = "(?i)sea level rise|rising sea level|global mean sea level",
+  "El Niño" = "(?i)El Niño|ENSO|El Nino|El Niño|El Niño–Southern Oscillation",
+  "monsoon" = "(?i)monsoon|Asian monsoon|Indian monsoon|West African monsoon|monsoonal",
+  "tropical cyclone" = "(?i)tropical cyclone|hurricane|typhoon|cyclonic storm",
+  "Hadley circulation" = "(?i)Hadley cell|Hadley circulation",
+  "Arctic amplification" = "(?i)Arctic amplification|polar amplification",
+  "ocean heat content" = "(?i)ocean heat content|OHC|heat uptake by ocean|thermal expansion",
+  "jet stream" = "(?i)jet stream|polar jet|subtropical jet"
+)
+
+# Assign article IDs
+full.dt[, article_id := .I]
+
+# Create long-format table linking each article to all matching research goals
+goal_links <- rbindlist(lapply(names(goal_keywords), function(goal) {
+  pattern <- goal_keywords[[goal]]
+  full.dt[grepl(pattern, full_text), .(article_id, goal)]
+}))
+
+# Merge matched goals back to full dataset
+goal_merged <- merge(goal_links, full.dt, by = "article_id")
+
+# Melt GCM columns to long format
+melted_goals <- melt(goal_merged,
+                     id.vars = c("goal"),
+                     measure.vars = gsub("-", "_", gcms),
+                     variable.name = "GCM",
+                     value.name = "Mention")
+
+# Summarize GCM mention frequency by research goal
+goal_gcm_ranking <- melted_goals %>%
+  group_by(goal, GCM) %>%
+  summarise(frequency = sum(Mention, na.rm = TRUE)) %>%
+  filter(frequency > 0) %>%
+  arrange(goal, desc(frequency)) %>%
+  ungroup()
+
+# View top results
+print(head(goal_gcm_ranking, 15))
+
+# Save to CSV
+fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
 
