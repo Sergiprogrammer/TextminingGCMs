@@ -34,6 +34,7 @@ full.dt <- clean_names(full.dt)
 # Define alias mappings and lists (paste your full alias + institution_list + country_aliases + country list block here)
 # -- shortened for brevity --
 institution_aliases <- c(
+  "barcelona supercomputing center" = "barcelona supercomputing center (bsc)", 
   "oxford university" = "university of oxford",
   "universiteit utrecht" = "utrecht university",
   "inpe" = "national institute for space research",
@@ -117,7 +118,7 @@ institution_list <- tolower(c(
   "academia sinica", "al-farahidi university", "alfred wegener institute (awi)", "andhra university", "anna university", "applied physics laboratory",
   "arctic and antarctic research institute (aari)", "army engineering university of pla", "atmospheric physics group",
   "atmospheric science and meteorological research center (asmerc)", "australian national university",
-  "banaras hindu university", "bangladesh university of engineering and technology", "barcelona supercomputing center",
+  "banaras hindu university", "bangladesh university of engineering and technology",
   "barcelona supercomputing center (bsc)", "begum rokeya university", "beijing climate center",
   "beijing forestry university", "beijing normal university","bureau of meteorology (bom)", "california institute of technology",
   "center for ocean-land-atmosphere studies", "canadian forest service", "center of advanced studies in arid zones (ceaza)", "central university",
@@ -574,6 +575,12 @@ goal_gcm_ranking <- melted_goals %>%
   group_by(goal, GCM) %>%
   summarise(frequency = sum(Mention, na.rm = TRUE)) %>%
   filter(frequency > 0) %>%
+  arrange(goal, desc(frequency)) %>%
+  ungroup()
+fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
+
+
+
   arrange(goal, desc(frequency)) %>%
   ungroup()
 fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
