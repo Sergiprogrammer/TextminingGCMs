@@ -499,14 +499,25 @@ cm_origin_institution <- data.frame(
   ),
   stringsAsFactors = FALSE
 )
+# Show models without institutions (NA or empty string)
+
 
 "Mediterranean Consortium"
 # --------------------------------------------
 # Step 4: Join with origin information
 # --------------------------------------------
+# Make GCM casing uniform (lowercase for both tables)
 institution_gcm_ranking <- institution_gcm_ranking %>%
-  left_join(gcm_origin_institution, by = "GCM") %>%
+  mutate(GCM = tolower(GCM))
+
+cm_origin_institution <- cm_origin_institution %>%
+  mutate(GCM = tolower(GCM))
+
+# Join based on lowercase GCM
+institution_gcm_ranking <- institution_gcm_ranking %>%
+  left_join(cm_origin_institution, by = "GCM") %>%
   arrange(institution, desc(frequency))
+
 
 # --------------------------------------------
 # Step 5: Export final dataset
