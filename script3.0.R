@@ -6,7 +6,7 @@ required_packages <- c(
   "data.table", "tidyverse", "janitor", "stringr", 
   "ggplot2", "reshape2", "cowplot", "patchwork", 
   "ggpubr", "lubridate", "knitr", "sf", 
-  "rnaturalearth", "readr", "ggforce", "dplyr", "randomForest", "rpart.plot"
+  "rnaturalearth", "readr", "ggforce", "dplyr", "randomForest", "rpart.plot", "writexl"
 )
 
 # Install missing packages only
@@ -34,6 +34,7 @@ full.dt <- clean_names(full.dt)
 # Define alias mappings and lists (paste your full alias + institution_list + country_aliases + country list block here)
 # -- shortened for brevity --
 institution_aliases <- c(
+  # Existing aliases
   "barcelona supercomputing center" = "barcelona supercomputing center (bsc)",
   "bsc" = "barcelona supercomputing center (bsc)",
   "oxford university" = "university of oxford",
@@ -64,7 +65,7 @@ institution_aliases <- c(
   "universidad nacional autÃ³noma de mÃ©xico" = "universidad nacional autónoma de méxico",
   "université catholique de louvain" = "uclouvain",
   "uclouvain" = "uclouvain",
-  "université de liège" = "university of liege",
+  "université de liège" = "university of liège",
   "uc berkeley" = "university of california",
   "university of california berkeley" = "university of california",
   "university of california, berkeley" = "university of california",
@@ -84,6 +85,7 @@ institution_aliases <- c(
   "fio" = "first institute of oceanography",
   "csiro" = "commonwealth scientific and industrial research organisation",
   "max-planck-institut für meteorologie" = "max planck institute",
+  "max planck institute for meteorology" = "max planck institute",
   "mpi-m" = "max planck institute",
   "nansen centre" = "nansen environmental and remote sensing centre (nersc)",
   "nersc" = "nansen environmental and remote sensing centre (nersc)",
@@ -106,16 +108,70 @@ institution_aliases <- c(
   "university of hawai" = "university of hawaii",
   "university of colorado at boulder" = "university of colorado boulder",
   "university of engineering & technology" = "university of engineering and technology",
-  "university of sao paulo" = "university of são paulo",
   "university unbc" = "university of northern british columbia",
   "university of north british columbia" = "university of northern british columbia",
   "university of northern british columbia (unbc)" = "university of northern british columbia",
+  
+  # NEWLY ADDED GLOBAL UNIVERSITY ABBREVIATIONS
+  "mit" = "massachusetts institute of technology",
+  "ucb" = "university of california",
+  "caltech" = "california institute of technology",
+  "ucla" = "university of california, los angeles",
+  "uq" = "the university of queensland",
+  "umich" = "university of michigan-ann arbor",
+  "mcgill" = "mcgill university",
+  "unimelb" = "the university of melbourne",
+  "utoronto" = "university of toronto",
+  "epfl" = "école polytechnique fédérale de lausanne",
+  "anu" = "australian national university",
+  "unsw" = "the university of new south wales",
+  "utokyo" = "the university of tokyo",
+  "dtu" = "technical university of denmark",
+  "gatech" = "georgia institute of technology",
+  "hku" = "the university of hong kong",
+  "hkust" = "the hong kong university of science and technology",
+  "unam" = "universidad nacional autónoma de méxico",
+  "psl" = "université psl",
+  "ntu" = "national taiwan university",
+  "um" = "universiti malaya",
+  "tu berlin" = "technische universität berlin",
+  "sorbonne" = "sorbonne university",
+  "ntnu" = "norwegian university of science and technology",
+  "radboud" = "radboud university",
+  "ncku" = "national cheng kung university",
+  "rwth" = "rwth aachen university",
+  "uclouvain" = "université catholique de louvain",
+  "vub" = "vrije universiteit brussel",
+  "uab" = "universitat autònoma de barcelona",
+  "tuebingen" = "eberhard karls universität tübingen",
+  "lmu" = "lmu munich",
+  "mpi-m" = "max planck institute for meteorology",
+  "kit" = "karlsruhe institute of technology",
+  "ucsd" = "university of california, san diego",
+  "osu" = "the ohio state university",
+  "upc" = "universitat politècnica de catalunya · barcelonatech",
+  "upm" = "universiti putra malaysia",
+  "utm" = "universiti teknologi malaysia",
+  "upenn" = "university of pennsylvania",
+  "umd" = "university of maryland",
+  "uiuc" = "university of illinois at urbana-champaign",
+  "uw-madison" = "university of wisconsin-madison",
+  "uci" = "university of california, irvine",
+  "cmu" = "carnegie mellon university",
+  "polyu" = "the hong kong polytechnic university",
+  "uwaterloo" = "university of waterloo",
+  "notredame" = "university of notre dame",
+  "tum" = "technical university of munich",
+  "tokyo tech" = "tokyo institute of technology",
+  "vu amsterdam" = "vrije universiteit amsterdam",
+  "wustl" = "washington university in st. louis",
+  
+ 
   "université" = NA,
   "universidad" = NA,
   "universiteit" = NA,
   "universitÃ©s" = NA
 )
-
 
 # Define institution list
 institution_list <- tolower(c(
@@ -233,7 +289,247 @@ institution_list <- tolower(c(
   "wageningen university", "walailak university", "waseda university", "washington state university",
   "westfield state university", "wuhan university", "wuxi university", "xiamen university",
   "yale university", "yonsei university", "york university", "yunnan university",
-  "zhejiang university"
+  "zhejiang university", "aalborg university",
+##########      missing universities of the top 450 (environment and technology)
+  "aalto university",
+  "aarhus university",
+  "aix-marseille university",
+  "albert-ludwigs-universitaet freiburg",
+  "asian institute of technology",
+  "bangor university",
+  "bauhaus university, weimar",
+  "beijing institute of technology",
+  "boston university",
+  "catholic university of eichstätt-ingolstadt",
+  "cardiff university",
+  "chinese academy of sciences (cas)",
+  "christian-albrechts-university zu kiel",
+  "city university of hong kong (cityuhk)",
+  "clausthal university of technology",
+  "complutense university of madrid",
+  "cranfield university",
+  "czech university of life sciences in prague",
+  "dalhousie university",
+  "darmstadt university of applied sciences",
+  "deakin university",
+  "durham university",
+  "eberhard karls universität tübingen",
+  "florida international university",
+  "florida state university",
+  "frankfurt university of applied sciences",
+  "friedrich alexander university erlangen-nürnberg",
+  "goethe-university frankfurt am main",
+  "griffith university",
+  "gwangju institute of science and technology (gist)",
+  "hamburg university of applied sciences",
+  "hannover medical school",
+  "heinrich heine university düsseldorf",
+  "helmholtz zentrum münchen",
+  "heriot-watt university",
+  "hildesheim university",
+  "huazhong university of science and technology",
+  "ilmenau university of technology",
+  "indian institute of science",
+  "indian institute of technology kharagpur (iit-kgp)",
+  "indiana university bloomington",
+  "iowa state university",
+  "istanbul technical university",
+  "jacobs university bremen",
+  "kasetsart university",
+  "karlsruhe institute of technology (kit)",
+  "karlsruhe university of applied sciences",
+  "kyushu university",
+  "leibniz university hannover",
+  "leiden university",
+  "linköping university",
+  "linnaeus university",
+  "lomonosov moscow state university",
+  "loughborough university",
+  "ludwig-maximilians-universität münchen",
+  "luleå university of technology",
+  "macquarie university (sydney, australia)",
+  "malmö university",
+  "martin luther university of halle-wittenberg",
+  "masaryk university",
+  "max planck institute for meteorology",
+  "mid sweden university",
+  "nagoya university",
+  "nankai university",
+  "national cheng kung university (ncku)",
+  "norwegian university of science and technology (ntnu)",
+  "örebro university",
+  "otto von guericke university magdeburg",
+  "philipps university of marburg",
+  "politecnico di milano",
+  "pusan national university",
+  "qatar university",
+  "queen mary university of london",
+  "queen's university at kingston",
+  "queensland university of technology (qut)",
+  "radboud university",
+  "rice university",
+  "rmit university",
+  "rwth aachen university",
+  "saarland university",
+  "sapienza university of rome",
+  "simon fraser university",
+  "södertörn university",
+  "south china university of technology",
+  "stockholm university",
+  "sun yat-sen university",
+  "sungkyunkwan university (skku)",
+  "technical university of braunschweig",
+  "technical university of denmark",
+  "technische universität berlin (tu berlin)",
+  "tohoku university",
+  "tongji university",
+  "trinity college dublin",
+  "tu berlin (technische universität berlin)",
+  "tu dortmund university",
+  "tu dresden (technische universität dresden)",
+  "tu hamburg",
+  "tu ilmenau (technische universität ilmenau)",
+  "universidad nacional autónoma de méxico (unam)",
+  "universidad politécnica de madrid (upm)",
+  "universidade estadual de campinas (unicamp)",
+  "universidade federal do rio grande do sul",
+  "universitat politècnica de catalunya · barcelonatech (upc)",
+  "universitat de valencia",
+  "université catholique de louvain",
+  "université de liège",
+  "université de strasbourg",
+  "université grenoble alpes",
+  "université laval",
+  "universität bremen",
+  "universität der bundeswehr münchen",
+  "universität hamburg",
+  "university of alabama",
+  "university of augsburg",
+  "university of bari aldo moro",
+  "university of bayreuth",
+  "university of bologna",
+  "university of bonn",
+  "university of bremen",
+  "university of canterbury",
+  "university of canterbury",
+  "university of cincinnati",
+  "university of cologne",
+  "university of connecticut",
+  "university of delaware",
+  "university of duisburg-essen",
+  "university of eastern finland",
+  "university of erlangen-nuremberg",
+  "university of essex",
+  "university of florence",
+  "university of geneva",
+  "university of georgia",
+  "university of gothenburg",
+  "university of granada",
+  "university of greifswald",
+  "university of göttingen",
+  "university of guelph",
+  "university of hagen",
+  "university of hawaiʻi at mānoa",
+  "university of heidelberg",
+  "university of hohenheim",
+  "university of hildesheim",
+  "university of illinois at chicago",
+  "university of illinois chicago (uic)",
+  "university of innsbruck",
+  "university of jena",
+  "university of kaiserslautern",
+  "university of kansas",
+  "university of kassel",
+  "university of kiel",
+  "university of koblenz-landau",
+  "university of konstanz",
+  "university of lausanne",
+  "university of leicester",
+  "university of liège",
+  "university of lisbon",
+  "university of ljubljana",
+  "university of mainz",
+  "university of mannheim",
+  "university of marburg",
+  "university of milan",
+  "university of montreal",
+  "university of nebraska",
+  "university of new mexico",
+  "university of nottingham",
+  "university of oldenburg",
+  "university of osnabrück",
+  "university of oulu",
+  "university of padua",
+  "university of palermo",
+  "university of parma",
+  "university of passau",
+  "university of pennsylvania",
+  "university of pisa",
+  "university of porto",
+  "university of potsdam",
+  "university of pretoria",
+  "university of regensburg",
+  "university of renes",
+  "university of rome tor vergata",
+  "university of rostock",
+  "university of santiago de compostela",
+  "university of sassari",
+  "university of seville",
+  "university of siegen",
+  "university of south carolina",
+  "university of south florida",
+  "university of split",
+  "university of st andrews",
+  "university of stuttgart",
+  "university of surrey",
+  "university of szeged",
+  "university of tartu",
+  "university of tasmania",
+  "university of texas at dallas",
+  "university of thessaloniki",
+  "university of torino",
+  "university of trento",
+  "university of trieste",
+  "university of tromsø",
+  "university of trier",
+  "university of tübingen",
+  "university of turin",
+  "university of turku",
+  "university of ulm",
+  "university of vaasa",
+  "university of valencia",
+  "university of valladolid",
+  "university of vancouver",
+  "university of vechta",
+  "university of vienna",
+  "university of vigo",
+  "university of vilnius",
+  "university of virginia",
+  "university of waikato",
+  "university of warsaw",
+  "university of waterloo",
+  "university of western australia",
+  "university of wisconsin",
+  "university of wrocław",
+  "university of wuppertal",
+  "university of würzburg",
+  "university of zagreb",
+  "university of zaragoza",
+  "ural federal university",
+  "virginia polytechnic institute and state university",
+  "vrije universiteit amsterdam",
+  "vrije universiteit brussel (vub)",
+  "washington state university",
+  "washington university in st. louis",
+  "western university",
+  "whu – otto beisheim school of management",
+  "witten/herdecke university",
+  "xiamen university",
+  "xiangtan university",
+  "yokohama national university",
+  "yonsei university",
+  "zeppelin university",
+  "école des ponts paristech"
 ))
 
 # Country alias corrections
@@ -314,16 +610,16 @@ extract_country <- function(affiliation) {
     affil_clean <- str_replace_all(affil_clean, alias, country_aliases[[alias]])
   }
   
-  # Match full country names in text
-  found <- sapply(country_list, function(cntry) {
-    str_detect(affil_clean, fixed(cntry))
-  })
+  # Match full country names in text in the order they appear
+  for (cntry in country_list) {
+    if (str_detect(affil_clean, fixed(cntry))) {
+      return(cntry)
+    }
+  }
   
-  matched <- country_list[found]
-  if (length(matched) == 0) return(NA)
-  
-  return(paste(unique(matched), collapse = " / "))
+  return(NA)
 }
+
 
 # Apply extraction
 full.dt[, institution := sapply(affiliations, extract_institutions)]
@@ -427,10 +723,16 @@ fwrite(summary_table, "GCM_mentions_by_institution.csv")
 # --------------------------------------------
 # Step 1: Normalize and split institutions
 # --------------------------------------------
-melted_institution_split %>%
+# Split institutions into separate rows
+melted_institution_split <- melted %>%
+  filter(!is.na(institution)) %>%
+  mutate(institution = str_split(institution, "/")) %>%
+  unnest(institution) %>%
+  mutate(institution = str_trim(institution))
+
+melted_institution_split <- melted_institution_split %>%
   mutate(
-    institution = str_trim(institution),
-    GCM = str_replace_all(GCM, "_", "-")  # Do not use toupper()
+    GCM = str_replace_all(GCM, "_", "-")
   )
 
 
@@ -487,7 +789,7 @@ cm_origin_institution <- data.frame(
     "university of tokyo / national institute for environmental studies (nies) / japan agency for marine-earth science and technology (jamstec)",
     "max planck institute",
     "meteorological research institute (mri)",
-    "national climate center, china",
+    "national climate center",
     "japan agency for marine-earth science and technology (jamstec)",
     "nansen environmental and remote sensing centre (nersc) / norwegian meteorological institute (met) / university of bergen / norwegian research centre (norce)",
     "atmospheric and environmental research (aer)",
@@ -592,6 +894,28 @@ goal_gcm_ranking <- melted_goals %>%
   filter(frequency > 0) %>%
   arrange(goal, desc(frequency)) %>%
   ungroup()
+fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
+
+
+######################
+###   Model Popularity
+######################
+
+
+
+model_popularity <- melted %>%
+  group_by(GCM) %>%
+  summarise(total_mentions = sum(Mention, na.rm = TRUE)) %>%
+  arrange(desc(total_mentions))
+
+# View the top few models
+print(head(model_popularity, 10))
+
+# Save to CSV
+fwrite(model_popularity, "GCM_model_popularity.csv")
+
+
+
 fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
 
 
