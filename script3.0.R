@@ -631,11 +631,10 @@ full.dt[, country := sapply(affiliations, extract_country)]
 
 # Define GCM model family list
 gcms <- c(
-  "ACCESS", "AWI", "BCC", "BNU", "CAM-MPAS", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
-  "CFSv2", "CMCC", "CNRM", "CSIRO", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
+  "ACCESS", "AWI", "BCC", "BNU", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
+  "CFSv2", "CMCC", "CNRM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
   "GFDL", "GEOS", "GISS", "HadGEM", "HiRAM", "ICON", "IITM", "INM", "IPSL", "KACE",
-  "KIOST", "LBLRTM", "MCM-UA", "MIROC", "MPI", "MRI", "NESM", "NICAM", "NorESM",
-  "RRTMG", "RTE", "SAM0", "TaiESM", "UKESM", "ARTS"
+  "KIOST", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM", "SAM0", "TaiESM", "UKESM"
 )
 
 
@@ -644,15 +643,14 @@ gcm_origin_country <- data.frame(
     "ACCESS", "AWI", "BCC", "BNU", "CAM-MPAS", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
     "CFSv2", "CMCC", "CNRM", "CSIRO", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
     "GFDL", "GEOS", "GISS", "HadGEM", "HiRAM", "ICON", "IITM", "INM", "IPSL", "KACE",
-    "KIOST", "LBLRTM", "MCM-UA", "MIROC", "MPI", "MRI", "NESM", "NICAM", "NorESM",
-    "RRTMG", "RTE", "SAM0", "TaiESM", "UKESM", "ARTS"
+    "KIOST", "LBLRTM", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM",
+    "RRTMG", "SAM0", "TaiESM", "UKESM"
   ),
   Origin_Country = c(
     "australia",             # ACCESS
     "germany",               # AWI
     "china",                 # BCC
     "china",                 # BNU
-    "united states",         # CAM-MPAS 
     "china",                 # CAMS
     "china",                 # CAS
     "italy",                 # CIESM
@@ -661,7 +659,6 @@ gcm_origin_country <- data.frame(
     "united states",         # CFSv2
     "italy",                 # CMCC
     "france",                # CNRM
-    "australia",             # CSIRO
     "canada",                # CanESM
     "united states",         # E3SM 
     "europe (Consortium)",   # EC-Earth
@@ -679,20 +676,16 @@ gcm_origin_country <- data.frame(
     "france",                # IPSL
     "south korea",           # KACE
     "south korea",           # KIOST
-    "united states",         # LBLRTM 
     "mexico",               # MCM-UA 
     "japan",                 # MIROC
-    "germany",               # MPI
+    "germany",               # MPI-ESM
     "japan",                 # MRI
     "china",                 # NESM
     "japan",                 # NICAM
     "norway",                # NorESM
-    "united states",         # RRTMG 
-    "united states",         # RTE 
     "south korea",           # SAM0 
     "taiwan",                # TaiESM
     "united kingdom",        # UKESM
-    "germany"                # ARTS 
   ),
   stringsAsFactors = FALSE
 )
@@ -746,18 +739,16 @@ institution_gcm_ranking <- melted_institution_split %>%
 
 cm_origin_institution <- data.frame(
   GCM = c(
-    "ACCESS", "AWI", "BCC", "BNU", "CAM-MPAS", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
-    "CFSv2", "CMCC", "CNRM", "CSIRO", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
+    "ACCESS", "AWI", "BCC", "BNU", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
+    "CFSv2", "CMCC", "CNRM", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
     "GFDL", "GEOS", "GISS", "HadGEM", "HiRAM", "ICON", "IITM", "INM", "IPSL", "KACE",
-    "KIOST", "LBLRTM", "MCM-UA", "MIROC", "MPI", "MRI", "NESM", "NICAM", "NorESM",
-    "RRTMG", "RTE", "SAM0", "TaiESM", "UKESM", "ARTS"
+    "KIOST", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM","SAM0", "TaiESM", "UKESM"
   ),
   Origin_Institution = c(
     "commonwealth scientific and industrial research organisation / bureau of meteorology (bom)",
     "alfred wegener institute (awi)",
     "beijing climate center",
     "beijing normal university",
-    "national center for atmospheric research (ncar)",
     "chinese academy of meteorological sciences",
     "chinese academy of sciences (cas)",
     "mediterranean consortium",
@@ -766,7 +757,6 @@ cm_origin_institution <- data.frame(
     "center for ocean-land-atmosphere studies / national oceanic and atmospheric administration (noaa)",
     "cmcc",
     "météo-france / centre national de la recherche scientifique (cnrs)",
-    "commonwealth scientific and industrial research organisation",
     "environment and climate change canada",
     "lawrence livermore national laboratory (llnl)",
     "ec-earth consortium",
@@ -784,7 +774,6 @@ cm_origin_institution <- data.frame(
     "institut pierre-simon laplace (ipsl)",
     "korea meteorological administration (kma)",
     "korea institute of ocean science and technology (kiost)",
-    "atmospheric and environmental research (aer)",
     "university of arizona",
     "university of tokyo / national institute for environmental studies (nies) / japan agency for marine-earth science and technology (jamstec)",
     "max planck institute",
@@ -792,12 +781,9 @@ cm_origin_institution <- data.frame(
     "national climate center",
     "japan agency for marine-earth science and technology (jamstec)",
     "nansen environmental and remote sensing centre (nersc) / norwegian meteorological institute (met) / university of bergen / norwegian research centre (norce)",
-    "atmospheric and environmental research (aer)",
-    "atmospheric and environmental research (aer)",
     "seoul national university (snu)",
     "academia sinica / national center for atmospheric research (ncar)",
-    "met office",
-    "german aerospace center (dlr)"
+    "met office"
   ),
   stringsAsFactors = FALSE
 )
@@ -913,6 +899,9 @@ print(head(model_popularity, 10))
 
 # Save to CSV
 fwrite(model_popularity, "GCM_model_popularity.csv")
+
+
+
 
 
 
