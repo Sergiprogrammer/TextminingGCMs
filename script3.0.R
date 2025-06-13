@@ -176,13 +176,13 @@ institution_aliases <- c(
 # Define institution list
 institution_list <- tolower(c(
   "academia sinica", "al-farahidi university", "alfred wegener institute (awi)", "andhra university", "anna university", "applied physics laboratory",
-  "arctic and antarctic research institute (aari)", "army engineering university of pla", "atmospheric and environmental research (aer)", "atmospheric physics group",
+  "arctic and antarctic research institute (aari)", "argonne national laboratory", "army engineering university of pla", "atmospheric and environmental research (aer)", "atmospheric physics group",
   "atmospheric science and meteorological research center (asmerc)", "australian national university",
   "banaras hindu university", "bangladesh university of engineering and technology",
   "barcelona supercomputing center (bsc)", "begum rokeya university", "beijing climate center",
-  "beijing forestry university", "beijing normal university","bureau of meteorology (bom)", "california institute of technology",
+  "beijing forestry university", "beijing normal university", "brookhaven national laboratory", "bureau of meteorology (bom)", "california institute of technology",
   "center for ocean-land-atmosphere studies", "canadian forest service", "center of advanced studies in arid zones (ceaza)", "central university",
-  "centre national de recherches météorologiques (cnrm)", "centre national de la recherche scientifique (cnrs)",
+  "centre national de recherches météorologiques (cnrm)", "centre national de la recherche scientifique (cnrs)", "central weather administration",
   "cmcc", "cheikh anta diop university", "chiba university",
   "china electric power research institute (cepri)", "china university of geosciences", "chinese academy of agricultural sciences",
   "chinese academy of meteorological sciences", "chinese academy of sciences (cas)", "chung yuan christian university",
@@ -202,20 +202,20 @@ institution_list <- tolower(c(
   "international pacific research center", "ipb university", "islamic azad university", "jadavpur university",
   "japan agency for marine-earth science and technology (jamstec)", "jawaharlal nehru university",
   "jeonbuk national university", "korea advanced institute of science and technology", "korea institute of ocean science and technology (kiost)", "korea meteorological administration (kma)", "kyoto university",
-  "laboratoire des sciences du climat et de l'environnement (lsce)", "lanzhou university", "lawrence livermore national laboratory (llnl)", "lehigh university",
+  "laboratoire des sciences du climat et de l'environnement (lsce)", "lanzhou university", "lawrence livermore national laboratory (llnl)", "lawrence berkeley national laboratory", "lehigh university",
   "lomonosov moscow state university", "los alamos national laboratory", "lund university", "mahidol university",
   "massachusetts institute of technology", "max planck institute", "mcgill university", "mediterranean consortium",
   "memorial university", "met office", "meteorological research institute (mri)", "middlesex university",
   "ministry of energy water research institute", "monash university", "montana state university",
   "moscow state university", "météo-france", "nanjing normal university", "nanjing university",
-  "nansen environmental and remote sensing centre (nersc)", "national aeronautics and space administration (nasa)", "national center for atmospheric research (ncar)",
+  "nansen environmental and remote sensing centre (nersc)", "national aeronautics and space administration (nasa)", "national center for atmospheric research (ncar)", "national central university",
   "national climate center", "national climatic data center", "national institute for space research", "national institute for environmental studies (nies)",
   "national institute of advanced industrial science and technology (aist)", "national oceanic and atmospheric administration (noaa)",
-  "national research and innovation agency", "national research council (cnr-isac)", "national taiwan normal university",
+  "national renewable energy laboratory", "national research and innovation agency", "national research council (cnr-isac)", "national taiwan normal university",
   "national taiwan university", "national university of singapore (nus)", "new york university", "newcastle university", "nirma university",
   "north carolina a and t state university", "northeast agricultural university", "northeastern university",
-  "northern arizona university", "northwest a&f university", "norwegian climate service service centre (ncss)", "norwegian meteorological institute (met)", "norwegian research centre (norce)", "old dominion university", "omdurman islamic university",
-  "open university", "peking university", "portland state university", "postech", "princeton university",
+  "northern arizona university", "northwest a&f university", "norwegian climate service service centre (ncss)", "norwegian meteorological institute (met)", "norwegian research centre (norce)", "oak ridge national laboratory", "old dominion university", "omdurman islamic university",
+  "open university", "pacific northwest national laboratory", "peking university", "portland state university", "postech", "princeton university",
   "pukyong national university", "punjab agricultural university", "purdue university", "ramkhamhaeng university",
   "ritsumeikan university", "royal netherlands meteorological institute (knmi)", "russian academy of sciences (ras)",
   "samara university", "san diego state university", "sandia national laboratory",
@@ -632,19 +632,17 @@ full.dt[, country := sapply(affiliations, extract_country)]
 # Define GCM model family list
 gcms <- c(
   "ACCESS", "AWI", "BCC", "BNU", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
-  "CFSv2", "CMCC", "CNRM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
+  "CFSv2", "CMCC", "CNRM", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
   "GFDL", "GEOS", "GISS", "HadGEM", "HiRAM", "ICON", "IITM", "INM", "IPSL", "KACE",
   "KIOST", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM", "SAM0", "TaiESM", "UKESM"
 )
 
-
 gcm_origin_country <- data.frame(
   GCM = c(
-    "ACCESS", "AWI", "BCC", "BNU", "CAM-MPAS", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
-    "CFSv2", "CMCC", "CNRM", "CSIRO", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
+    "ACCESS", "AWI", "BCC", "BNU", "CAMS", "CAS", "CIESM", "CCSM", "CESM",
+    "CFSv2", "CMCC", "CNRM", "CanESM", "E3SM", "EC-Earth", "ECMWF-IFS", "FGOALS", "FIO",
     "GFDL", "GEOS", "GISS", "HadGEM", "HiRAM", "ICON", "IITM", "INM", "IPSL", "KACE",
-    "KIOST", "LBLRTM", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM",
-    "RRTMG", "SAM0", "TaiESM", "UKESM"
+    "KIOST", "MCM-UA", "MIROC", "MPI-ESM", "MRI", "NESM", "NICAM", "NorESM", "SAM0", "TaiESM", "UKESM"
   ),
   Origin_Country = c(
     "australia",             # ACCESS
@@ -676,7 +674,7 @@ gcm_origin_country <- data.frame(
     "france",                # IPSL
     "south korea",           # KACE
     "south korea",           # KIOST
-    "mexico",               # MCM-UA 
+    "mexico",                # MCM-UA 
     "japan",                 # MIROC
     "germany",               # MPI-ESM
     "japan",                 # MRI
@@ -685,10 +683,11 @@ gcm_origin_country <- data.frame(
     "norway",                # NorESM
     "south korea",           # SAM0 
     "taiwan",                # TaiESM
-    "united kingdom",        # UKESM
+    "united kingdom"         # UKESM
   ),
-  stringsAsFactors = FALSE
-)
+
+
+  stringsAsFactors = FALSE)
 
 
 
@@ -758,7 +757,7 @@ cm_origin_institution <- data.frame(
     "cmcc",
     "météo-france / centre national de la recherche scientifique (cnrs)",
     "environment and climate change canada",
-    "lawrence livermore national laboratory (llnl)",
+    "lawrence livermore national laboratory (llnl) / los alamos national laboratory, argonne national laboratory / oak ridge national laboratory / sandia national laboratories / brookhaven national laboratory / lawrence berkeley national laboratory / pacific northwest national laboratory / national renewable energy laboratory",
     "ec-earth consortium",
     "european centre for medium-range weather forecasts (ecmwf)",
     "chinese academy of sciences (cas)",
@@ -782,7 +781,7 @@ cm_origin_institution <- data.frame(
     "japan agency for marine-earth science and technology (jamstec)",
     "nansen environmental and remote sensing centre (nersc) / norwegian meteorological institute (met) / university of bergen / norwegian research centre (norce)",
     "seoul national university (snu)",
-    "academia sinica / national center for atmospheric research (ncar)",
+    "academia sinica / national central university / central weather administration",
     "met office"
   ),
   stringsAsFactors = FALSE
@@ -900,6 +899,73 @@ print(head(model_popularity, 10))
 # Save to CSV
 fwrite(model_popularity, "GCM_model_popularity.csv")
 
+
+
+
+
+
+
+# --------------------------------------------
+# 1. Extract all institutions per paper
+# --------------------------------------------
+
+# Custom extractor function
+extract_all_institutions <- function(affiliation) {
+  if (is.na(affiliation) || str_trim(affiliation) == "") return(NA)
+  parts <- unlist(str_split(affiliation, ",|;|/"))
+  parts <- str_trim(tolower(parts))
+  found <- unique(sapply(institution_list, function(inst) {
+    if (any(str_detect(parts, fixed(inst)))) return(inst)
+    return(NA)
+  }))
+  found <- found[!is.na(found)]
+  if (length(found) == 0) return(NA)
+  return(paste(sort(found), collapse = " / "))
+}
+
+# Apply extraction to affiliation column
+full.dt[, institutions_combined := sapply(affiliations, extract_all_institutions)]
+
+# --------------------------------------------
+# 2. Melt GCM columns to long format
+# --------------------------------------------
+
+
+# Convert to column names (underscores)
+gcm_cols <- gsub("-", "_", gcms)
+
+# Melt using data.table::melt to preserve data.table class
+gcm_long <- data.table::melt(
+  full.dt,
+  id.vars = c("title", "institutions_combined"),
+  measure.vars = gcm_cols,
+  variable.name = "GCM",
+  value.name = "Mention"
+)
+
+# Make sure it's a data.table
+setDT(gcm_long)
+
+# Fix GCM name formatting
+gcm_long[, GCM := str_replace_all(GCM, "_", "-")]
+
+# --------------------------------------------
+# 3. Filter and summarise
+# --------------------------------------------
+
+gcm_mentions_by_paper <- gcm_long[
+  !is.na(institutions_combined) & Mention > 0
+][
+  , .(frequency = sum(Mention)), by = .(title, institutions_combined, GCM)
+][
+  order(-frequency)
+]
+
+# --------------------------------------------
+# 4. Export to CSV
+# --------------------------------------------
+
+fwrite(gcm_mentions_by_paper, "GCM_mentions_by_combined_institutions.csv")
 
 
 
