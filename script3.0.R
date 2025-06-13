@@ -900,16 +900,13 @@ print(head(model_popularity, 10))
 fwrite(model_popularity, "GCM_model_popularity.csv")
 
 
-
-
-
+######### for papers with multiple institutions
 
 
 # --------------------------------------------
 # 1. Extract all institutions per paper
 # --------------------------------------------
 
-# Custom extractor function
 extract_all_institutions <- function(affiliation) {
   if (is.na(affiliation) || str_trim(affiliation) == "") return(NA)
   parts <- unlist(str_split(affiliation, ",|;|/"))
@@ -923,18 +920,14 @@ extract_all_institutions <- function(affiliation) {
   return(paste(sort(found), collapse = " / "))
 }
 
-# Apply extraction to affiliation column
 full.dt[, institutions_combined := sapply(affiliations, extract_all_institutions)]
 
 # --------------------------------------------
 # 2. Melt GCM columns to long format
 # --------------------------------------------
 
-
-# Convert to column names (underscores)
 gcm_cols <- gsub("-", "_", gcms)
 
-# Melt using data.table::melt to preserve data.table class
 gcm_long <- data.table::melt(
   full.dt,
   id.vars = c("title", "institutions_combined"),
@@ -943,11 +936,10 @@ gcm_long <- data.table::melt(
   value.name = "Mention"
 )
 
-# Make sure it's a data.table
 setDT(gcm_long)
 
-# Fix GCM name formatting
-gcm_long[, GCM := str_replace_all(GCM, "_", "-")]
+# Standardize GCM format
+gcm_long[, GCM := str_to_upper(str_replace_all(GCM, "_", "-"))]
 
 # --------------------------------------------
 # 3. Filter and summarise
@@ -962,15 +954,28 @@ gcm_mentions_by_paper <- gcm_long[
 ]
 
 # --------------------------------------------
-# 4. Export to CSV
+# 4. Add Originating Institution
+# --------------------------------------------
+
+# Standardize GCM names in origin table
+cm_origin_institution$GCM <- str_to_upper(str_replace_all(cm_origin_institution$GCM, "_", "-"))
+
+# Ensure character type before merge
+gcm_mentions_by_paper$GCM <- as.character(gcm_mentions_by_paper$GCM)
+cm_origin_institution$GCM <- as.character(cm_origin_institution$GCM)
+
+# Merge with origin institution
+gcm_mentions_by_paper <- merge(
+  gcm_mentions_by_paper,
+  cm_origin_institution,
+  by = "GCM",
+  all.x = TRUE
+)
+
+# --------------------------------------------
+# 5. Export to CSV
 # --------------------------------------------
 
 fwrite(gcm_mentions_by_paper, "GCM_mentions_by_combined_institutions.csv")
-
-
-
-
-
-fwrite(goal_gcm_ranking, "GCM_mentions_ranking_by_research_goal.csv")
 
 
