@@ -535,10 +535,6 @@ institution_list <- tolower(c(
 # Country alias corrections
 country_aliases <- c(
   "usa" = "united states",
-  "u\\.s\\.a\\." = "united states",
-  "u\\.s\\." = "united states",
-  "us" = "united states",
-  "uk" = "united kingdom",
   "england" = "united kingdom",
   "republic of korea" = "south korea",
   "korea,? south" = "south korea",
