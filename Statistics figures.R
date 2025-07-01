@@ -402,84 +402,98 @@ ggplot(df, aes(x = label, y = reliance)) +
 
 
 ######################
-##### institutional attachment to favorite model
+##### Institutional attachment to favorite model
 ##### & percentage of studies relying on institutional favorite model
-
-###################
-## Institutional preference of favorite model
-###################
-
-###################
-## Institutional preference of favorite model
-###################
+######################
 
 # Load packages
 library(data.table)
 library(dplyr)
 library(ggplot2)
+library(Cairo)  # For high-resolution PNG export
 
-# Load GCM mentions by institution
-df <- fread("C:/Textmining GCMs 2.0/results/GCM_mentions_ranking_by_institution.csv")
+# 1. Load GCM mentions by institution
+df <- fread("C:/Textmining GCMs 2.0/GCM_mentions_ranking_by_institution.csv")
 
-# Step 1: Calculate total mentions per institution
+# 2. Calculate total mentions per institution
 df_summary <- df %>%
   group_by(institution) %>%
   mutate(total_mentions = sum(frequency)) %>%
   ungroup()
 
-# Step 2: Filter to institutions with >5 total GCM mentions
+# 3. Filter institutions with >0 total mentions
 df_filtered <- df_summary %>%
-  filter(total_mentions > 5)
+  filter(total_mentions > 0)
 
-# Step 3: Get favorite GCM per institution and calculate attachment %
+# 4. Get favorite GCM per institution and calculate attachment percentage
 df_top <- df_filtered %>%
   group_by(institution) %>%
   slice_max(order_by = frequency, n = 1, with_ties = FALSE) %>%
   mutate(attachment_pct = 100 * frequency / total_mentions) %>%
   ungroup()
 
-# Step 4: Prepare factor order for proper x placement
+# 5. Order factors for plotting
 df_top <- df_top %>%
   mutate(institution = factor(institution, levels = reorder(institution, -attachment_pct) %>% levels()))
 
-# Step 5: Plot with red average line and in-plot label
-ggplot(df_top, aes(x = institution, y = attachment_pct)) +
+# 6. Create the plot
+attachment_plot <- ggplot(df_top, aes(x = institution, y = attachment_pct)) +
   geom_col(fill = "steelblue") +
-  geom_hline(yintercept = 33.6, color = "red", linetype = "dashed", size = 1) +
+  geom_hline(yintercept = 56.3, color = "red", linetype = "dashed", size = 1) +
   annotate("text", 
            x = tail(levels(df_top$institution), 1), 
-           y = 35.5, 
-           label = "Avg. institutional model attachment for all papers: 33.6%", 
+           y = 59, 
+           label = "Avg. institutional model attachment for all papers: 56.3%", 
            color = "red", 
            hjust = 1) +
   labs(
-    title = "Institutional Attachment to Favorite GCM (Only Institutions >5 GCM Mentions)",
     x = "Institution",
     y = "Attachment (%)"
   ) +
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
+# 7. Draw the plot in RStudio
+print(attachment_plot)
+
+# 8. Export high-resolution PNG using CairoPNG
+CairoPNG("C:/Textmining GCMs 2.0/plots/institutional_model_attachment.png",
+         width = 12, height = 8, units = "in", dpi = 600)
+
+# Draw to PNG device
+print(attachment_plot)
+
+# Finalize file
+dev.off()
+
+
+
+
+
+
+
 
 
 ##############################
-###### research goal mosaik
+###### Research Goal Mosaic Plot
+##############################
 
 # Load packages
 library(data.table)
 library(dplyr)
 library(ggplot2)
 library(ggmosaic)
-library(scales)  # for hue_pal()
+library(scales)
+library(Cairo)  # for high-resolution PNG export
 
-# Load the data
-df <- fread("C:/Textmining GCMs 2.0/results/GCM_mentions_ranking_by_research_goal.csv")
+# 1. Load the data
+df <- fread("C:/Textmining GCMs 2.0/GCM_mentions_ranking_by_research_goal.csv")
 
-# Clean column names
+# 2. Clean column names
 colnames(df) <- tolower(colnames(df))
 colnames(df) <- gsub("\\s+", "_", colnames(df))
 
-# Step 1: Add GCM group column, grouping non-top-5 per goal as "Other models"
+# 3. Group non-top-5 GCMs per goal into "Other models"
 df_grouped <- df %>%
   group_by(goal) %>%
   mutate(rank = rank(-frequency, ties.method = "first")) %>%
@@ -487,34 +501,44 @@ df_grouped <- df %>%
   group_by(goal, gcm_grouped) %>%
   summarise(frequency = sum(frequency), .groups = "drop")
 
-# Step 2: Generate colors
+# 4. Define color palette
 gcm_unique <- unique(df_grouped$gcm_grouped)
-# Create base color palette
-base_colors <- hue_pal()(length(gcm_unique) - 2)  # leave room for GFDL and Other models
-# Remove GFDL and "Other models" from base assignment
+base_colors <- hue_pal()(length(gcm_unique) - 2)
 non_custom_gcms <- setdiff(gcm_unique, c("GFDL", "Other models"))
 gcm_colors <- setNames(base_colors, non_custom_gcms)
-# Add custom colors
 gcm_colors["GFDL"] <- "black"
 gcm_colors["Other models"] <- "grey70"
 gcm_colors["ICON"] <- "red"
 gcm_colors["MRI"] <- "chocolate4"
 gcm_colors["MPI_ESM"] <- "blue4"
 gcm_colors["IPSL"] <- "purple"
-# Step 3: Mosaic plot
-ggplot(data = df_grouped) +
+
+# 5. Create the mosaic plot
+mosaic_plot <- ggplot(data = df_grouped) +
   geom_mosaic(aes(weight = frequency, x = product(goal), fill = gcm_grouped), na.rm = TRUE) +
   scale_fill_manual(values = gcm_colors) +
   labs(
-    title = "Top 5 GCMs per Research Goal",
     x = "Research Goal",
     y = "Proportion",
     fill = "GCM"
   ) +
   theme_minimal(base_size = 12) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8)
+  )
 
+# 6. Show plot in RStudio
+print(mosaic_plot)
 
+# 7. Export high-resolution PNG using CairoPNG
+CairoPNG("C:/Textmining GCMs 2.0/plots/mosaic_research_goal_gcm.png",
+         width = 12, height = 8, units = "in", dpi = 600)
+
+# Print to PNG device
+print(mosaic_plot)
+
+# Finalize export
+dev.off()
 
 
 
@@ -522,31 +546,34 @@ ggplot(data = df_grouped) +
 
 
 #############################################
-########## Bipartite network country GCM>5
+########## Network plot: country–GCM > 3
+#############################################
 
-# Load required libraries
+# 1. Load required libraries
 library(data.table)
 library(igraph)
 library(ggraph)
 library(tidygraph)
 library(dplyr)
-library(stringr)  # for str_to_title
+library(stringr)
+library(ggplot2)
+library(Cairo)  # For high-quality PNG export
 
-# Load the dataset
-df <- fread("C:/Textmining GCMs 2.0/results/GCM_mentions_ranking_by_country.csv")
+# 2. Load the dataset
+df <- fread("C:/Textmining GCMs 2.0/GCM_mentions_ranking_by_country.csv")
 
-# Title case the country names
+# 3. Title case the country names
 df[, country := str_to_title(country)]
 
-# Filter for frequency > 5
-df_filtered <- df[frequency > 5]
+# 4. Filter for GCM–country frequencies > 3
+df_filtered <- df[frequency > 3]
 
-# Define GCM relabeling with country of origin
+# 5. Define GCM relabeling with country of origin
 gcm_with_country <- c(
   "ACCESS" = "ACCESS (Australia)", "AWI" = "AWI (Germany)",
   "BCC" = "BCC (China)", "BNU" = "BNU (China)", "CAMS" = "CAMS (China)",
   "CAS" = "CAS (China)", "CIESM" = "CIESM (Italy)", "CCSM" = "CCSM (United States)",
-  "CESM" = "CESM (United States)", "CFSV2" = "CFSv2 (United States)",
+  "CESM" = "CESM (United States)", "CFSv2" = "CFSv2 (United States)",
   "CMCC" = "CMCC (Italy)", "CNRM" = "CNRM (France)", "CanESM" = "CanESM (Canada)",
   "E3SM" = "E3SM (United States)", "EC-Earth" = "EC-Earth (Europe (Consortium))",
   "ECMWF-IFS" = "ECMWF-IFS (Europe (Consortium))", "FGOALS" = "FGOALS (China)",
@@ -560,30 +587,45 @@ gcm_with_country <- c(
   "TaiESM" = "TaiESM (Taiwan)", "UKESM" = "UKESM (United Kingdom)"
 )
 
-# Relabel GCMs
+# 6. Relabel GCMs with their country of origin
 df_filtered$GCM <- ifelse(df_filtered$GCM %in% names(gcm_with_country),
                           gcm_with_country[df_filtered$GCM],
                           df_filtered$GCM)
 
-# Create edge list
+# 7. Create edge list and graph
 edges <- df_filtered[, .(country, GCM)]
-
-# Create bipartite graph
 nodes <- unique(c(df_filtered$country, df_filtered$GCM))
 node_type <- c(rep(TRUE, length(unique(df_filtered$country))),
                rep(FALSE, length(unique(df_filtered$GCM))))
-
-g <- graph_from_data_frame(d = edges, vertices = data.frame(name = nodes, type = node_type), directed = FALSE)
-
-# Convert to tidygraph for ggraph plotting
+g <- graph_from_data_frame(d = edges,
+                           vertices = data.frame(name = nodes, type = node_type),
+                           directed = FALSE)
 g_tbl <- as_tbl_graph(g)
 
-# Plot the bipartite network
-ggraph(g_tbl, layout = "fr") +
+# 8. Create and assign the plot to net_plot
+net_plot <- ggraph(g_tbl, layout = "fr") +
   geom_edge_link(alpha = 0.5) +
   geom_node_point(aes(color = as.factor(type)), size = 4) +
   geom_node_text(aes(label = name), repel = TRUE, size = 3) +
-  scale_color_manual(values = c("forestgreen", "steelblue"), labels = c("GCM", "Country")) +
+  scale_color_manual(values = c("forestgreen", "steelblue"),
+                     labels = c("GCM", "Country")) +
   theme_void() +
-  labs(title = "Country–GCM network", subtitle = "Filtered by frequency > 5", color = "Node Type")
+  labs(color = "Node Type") +
+  theme(
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 16)
+  )
+
+# 9. Draw the plot in RStudio
+print(net_plot)
+
+# 10. Export high-resolution PNG manually using CairoPNG
+CairoPNG("C:/Textmining GCMs 2.0/plots/network_country_GCM.png",
+         width = 12, height = 10, units = "in", dpi = 600)
+
+# Draw to the PNG device
+print(net_plot)
+
+# Finalize the file
+dev.off()
 
