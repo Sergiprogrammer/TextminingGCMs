@@ -75,7 +75,7 @@ institution_aliases <- c(
   "national center for atmospheric research, boulder" = "national center for atmospheric research",
   "university of chinese academy of sciences" = "chinese academy of sciences (cas)",
   "state key laboratory of numerical modeling for atmospheric sciences and geophysical fluid dynamics" = "chinese academy of sciences (cas)",
-  "chinese academy of sciences (cas)" = "chinese academy of sciences (cas)",
+  "chinese academy of sciences" = "chinese academy of sciences (cas)",
   "chinese academy of sciences / chinese academy of sciences (cas)" = "chinese academy of sciences (cas)",
   "cas" = "chinese academy of sciences (cas)",
   "iit roorkee" = "indian institute of technology roorkee",
@@ -166,7 +166,7 @@ institution_aliases <- c(
   "vu amsterdam" = "vrije universiteit amsterdam",
   "wustl" = "washington university in st. louis",
   
- 
+  
   "université" = NA,
   "universidad" = NA,
   "universiteit" = NA,
@@ -290,7 +290,7 @@ institution_list <- tolower(c(
   "westfield state university", "wuhan university", "wuxi university", "xiamen university",
   "yale university", "yonsei university", "york university", "yunnan university",
   "zhejiang university", "aalborg university",
-##########      missing universities of the top 450 (environment and technology)
+  ##########      missing universities of the top 450 (environment and technology)
   "aalto university",
   "aarhus university",
   "aix-marseille university",
@@ -681,21 +681,54 @@ gcm_origin_country <- data.frame(
     "taiwan",                # TaiESM
     "united kingdom"         # UKESM
   ),
-
-
+  
+  
   stringsAsFactors = FALSE)
+
+
+############## helper
+extract_gcm_mentions <- function(text_raw) {
+  if (is.na(text_raw) || stringr::str_trim(text_raw) == "") return(NA_character_)
+  
+  hits <- character(0)
+  
+  for (m in gcms) {
+    if (stringr::str_detect(text_raw,
+                            stringr::regex(paste0("\\b", m, "\\b"), ignore_case = FALSE))) {
+      hits <- c(hits, m)
+    }
+  }
+  
+  if (length(hits) == 0) return(NA_character_)
+  paste(sort(unique(hits)), collapse = " / ")
+}
+
+
+
+
+
+
 
 
 
 # Combine text fields
-full.dt[, full_text := paste(title, abstract, author_keywords, index_keywords, sep = " ")]
-full.dt[, full_text := tolower(full_text)]
+# Create full_text_raw (preserves original case) and full_text (lowercase)
+full.dt[, full_text_raw := paste(title, abstract, author_keywords, index_keywords, sep = " ")]
+full.dt[, full_text := tolower(full_text_raw)]
 
-# Create GCM detection columns
+# ------------------------------------------------------------------
+# Exact-case, word-boundary search for *every* model in `gcms`
+# ------------------------------------------------------------------
 for (model in gcms) {
-  colname <- gsub("-", "_", model)
-  full.dt[, (colname) := fifelse(grepl(tolower(model), full_text), 1, 0)]
+  colname  <- gsub("-", "_", model)
+  pattern  <- paste0("\\b", model, "\\b")
+  
+  full.dt[, (colname) :=
+            fifelse(str_detect(full_text_raw,
+                               regex(pattern, ignore_case = FALSE)),
+                    1L, 0L)]
 }
+
 
 # Melt and summarise
 melted <- melt(full.dt, id.vars = "institution", measure.vars = gsub("-", "_", gcms), variable.name = "GCM", value.name = "Mention")
@@ -971,6 +1004,62 @@ gcm_mentions_by_paper <- merge(
 # --------------------------------------------
 # 5. Export to CSV
 # --------------------------------------------
+
+fwrite(gcm_mentions_by_paper, "GCM_mentions_by_combined_institutions.csv")
+
+
+
+################################
+# ──────────────────────────────────────────────────────────────
+# Show 10 random publications with all extracted countries
+# ──────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────
+# Show 10 random publications with title + 4 extracted fields
+# ────────────────────────────────────────────────────────────
+library(data.table)
+
+## 1. If needed, generate the helper columns ----
+if (!("gcms_mentioned" %in% names(full.dt))) {
+  gcm_cols <- gsub("-", "_", gcms)  # convert names like "MPI-ESM" to "MPI_ESM"
+  
+  full.dt[, gcms_mentioned := apply(.SD, 1, function(x) {
+    present <- names(which(x == 1))
+    present <- toupper(gsub("_", "-", present))
+    if (length(present) == 0) NA_character_ else paste(sort(present), collapse = " / ")
+  }), .SDcols = gcm_cols]
+}
+
+if (!("goals_extracted" %in% names(full.dt))) {
+  full.dt[, goals_extracted := sapply(full_text, function(txt) {
+    goals <- names(goal_keywords)[
+      vapply(goal_keywords, function(pat) grepl(pat, txt, perl = TRUE), logical(1))
+    ]
+    if (length(goals) == 0) NA_character_ else paste(sort(goals), collapse = " / ")
+  })]
+}
+
+## 2. Sample 10 publications ----
+set.seed(42)
+sample_rows <- full.dt[sample(.N, 20)]
+
+## 3. Create summary table ----
+random_summary <- sample_rows[, .(
+  title,
+  institutions_extracted   = institutions_combined,
+  country_extracted        = country,
+  research_goals_extracted = goals_extracted,
+  gcms_extracted           = gcms_mentioned
+)]
+
+## 4. Show in console and save to file
+print(random_summary)
+fwrite(random_summary, "random_10_publications_table.csv")
+
+
+
+
+
+
 
 fwrite(gcm_mentions_by_paper, "GCM_mentions_by_combined_institutions.csv")
 
